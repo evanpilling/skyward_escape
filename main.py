@@ -1,20 +1,7 @@
 import pygame
+import sys
 import time
 import random
-pygame.font.init()
-
-WIDTH, HEIGHT = 1000, 800
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Mountain Dodge")
-
-BG = pygame.transform.scale(pygame.image.load("skyward_escape/images/game_image.jpeg"), (WIDTH, HEIGHT))
-
-PLAYER_WIDTH = 40
-PLAYER_HEIGHT = 60
-
-PLAYER_VELOCITY = 5
-
-FONT = pygame.font.SysFont("Bell MT", 30)
 
 def draw(player, elasped_time, stars):
     WIN.blit(BG, (0, 0))
@@ -29,12 +16,17 @@ def draw(player, elasped_time, stars):
 
     pygame.display.update()
 
+def draw_text(text, font, color, surface, x, y):
+    textobj = font.render(text, 1, color)
+    textrect = textobj.get_rect()
+    textrect.topleft = (x, y)
+    surface.blit(textobj, textrect)
+
 def main():
     run = True
 
     player = pygame.Rect(200, HEIGHT - PLAYER_HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT)
 
-    clock = pygame.time.Clock()
     start_time = time.time()
     elasped_time = 0
 
@@ -71,6 +63,8 @@ def main():
             player.x -= PLAYER_VELOCITY
         elif keys[pygame.K_RIGHT] and (player.x + PLAYER_VELOCITY + PLAYER_WIDTH) <= WIDTH:
             player.x += PLAYER_VELOCITY
+        elif keys[pygame.K_ESCAPE]:
+            run = False
 
         for star in stars[:]:
             star.y += STAR_VELOCITY
@@ -96,7 +90,56 @@ def main():
 
         draw(player, elasped_time, stars)
 
-    pygame.quit()
+    # pygame.quit()
+
+def main_menu():
+    while True:
+        WIN.fill('light blue')
+        draw_text('Main Menu', FONT, (255, 255, 255), WIN, 20, 20)
+
+        mx, my = pygame.mouse.get_pos()
+
+        button_1 = pygame.Rect(50, 100, 200, 50)
+        button_2 = pygame.Rect(50, 200, 200, 50)
+        if button_1.collidepoint((mx, my)):
+            if click:
+                main()
+        if button_2.collidepoint((mx, my)):
+            if click:
+                pass
+
+        pygame.draw.rect(WIN, (255, 0, 0), button_1)
+        pygame.draw.rect(WIN, (255, 0, 0), button_2)
+
+        click = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
+
+        pygame.display.update()
+        clock.tick(60)
 
 if __name__ == "__main__":
-    main()
+    pygame.font.init()
+    title_screen = True
+    WIDTH, HEIGHT = 1000, 800
+    WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Skyward Escape")
+
+    BG = pygame.transform.scale(pygame.image.load("images/game_image.jpeg"), (WIDTH, HEIGHT))
+
+    PLAYER_WIDTH = 40
+    PLAYER_HEIGHT = 60
+    PLAYER_VELOCITY = 5
+
+    FONT = pygame.font.SysFont("Bell MT", 30)
+    clock = pygame.time.Clock()
+    keys = pygame.key.get_pressed()
+    main_menu()
