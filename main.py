@@ -1,6 +1,7 @@
 import pygame
 import random
 import sys
+import threading
 import time
 
 def draw(player, elasped_time, stars):
@@ -20,6 +21,51 @@ def draw(player, elasped_time, stars):
 
     # Keep display updating at 60FPS
     pygame.display.update()
+
+def do_work():
+    global loading_finished, loading_progress
+
+    for i in range(WORK):
+        math_equation = 605281 / 490346 * 58285
+        loading_progress = i
+
+    loading_finished = True
+
+def loading_screen():
+    LOADING_BG = pygame.image.load("images/loading_bar_background.png")
+    LOADING_BG_RECT = LOADING_BG.get_rect(center=(500, 400))
+
+    loading_bar = pygame.image.load("images/loading_bar.png")
+    loading_bar_rect = loading_bar.get_rect(midleft=(219, 400))
+    max_loading_bar_width = LOADING_BG_RECT.width - 50
+    global loading_finished
+    global loading_progress
+    loading_progress = 0
+    loading_bar_width = 8
+    loading_finished = False
+
+    threading.Thread(target=do_work).start()
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.quit:
+                pygame.quit()
+                sys.exit()
+
+        WIN.fill("#0d0e2e")
+
+        if not loading_finished:
+            loading_bar_width = loading_progress / WORK * max_loading_bar_width
+            loading_bar = pygame.transform.scale(loading_bar, (int(loading_bar_width), 150))
+            loading_bar_rect = loading_bar.get_rect(midleft=(150, 400))
+
+            WIN.blit(LOADING_BG, LOADING_BG_RECT)
+            WIN.blit(loading_bar, loading_bar_rect)
+        else:
+            return
+
+        pygame.display.update()
+        clock.tick(60)
 
 def main():
     #Player creation
@@ -120,6 +166,7 @@ def main_menu():
         # Button click events
         if button_1.collidepoint((mx, my)):
             if click:
+                loading_screen()
                 main()
         if button_2.collidepoint((mx, my)):
             if click:
@@ -185,6 +232,7 @@ if __name__ == "__main__":
     # Clock variables
     clock = pygame.time.Clock()
     keys = pygame.key.get_pressed()
+    WORK = 10000000
 
     # Initialize the mixer module
     # pygame.mixer.init()
